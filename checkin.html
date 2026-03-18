@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日打卡</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9f0f8;
+            --bg-tertiary: #fef7ff;
+            --text-primary: #5a4b60;
+            --text-secondary: #8a7a90;
+            --text-tertiary: #b8a9c0;
+            --border: #e8d9f0;
+            --border-light: #f0e6f7;
+            --shadow: 0 4px 24px rgba(221, 160, 221, 0.15);
+            --shadow-hover: 0 12px 32px rgba(221, 160, 221, 0.25);
+            --transition: all 0.3s ease;
+            --primary-color: #ff85c0;
+            --secondary-color: #a8d1e7;
+            --accent-color: #ffb6c1;
+            --success-color: #90ee90;
+            --gradient: linear-gradient(135deg, #ffc0cb 0%, #add8e6 100%);
+        }
+
+        body {
+            font-family: 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-secondary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 25% 25%, #ffd6e7 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, #d6eaff 0%, transparent 50%);
+        }
+
+        .container {
+            background: var(--bg-primary);
+            border-radius: 28px;
+            padding: 60px 40px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            border: 1px solid var(--border-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: var(--gradient);
+            opacity: 0.05;
+            animation: rotate 20s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .container > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .date-display {
+            margin-bottom: 40px;
+        }
+
+        .date-display .day {
+            font-size: 72px;
+            font-weight: 300;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 4px rgba(255, 133, 192, 0.2);
+        }
+
+        .date-display .month-year {
+            font-size: 17px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        .week-day {
+            font-size: 24px;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 60px;
+            font-style: italic;
+        }
+
+        .checkin-btn {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 32px rgba(255, 133, 192, 0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin: 0 auto 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .checkin-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+
+        .checkin-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 12px 40px rgba(255, 133, 192, 0.6);
+        }
+
+        .checkin-btn:active:not(:disabled) {
+            transform: scale(0.98);
+        }
+
+        .checkin-btn:disabled {
+            background: linear-gradient(135deg, var(--success-color), #98fb98);
+            cursor: not-allowed;
+            box-shadow: 0 8px 32px rgba(144, 238, 144, 0.4);
+        }
+
+        .checkin-btn .icon {
+            font-size: 48px;
+            line-height: 1;
+        }
+
+        .checkin-btn .text {
+            font-size: 18px;
+        }
+
+        .status {
+            font-size: 15px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .status.completed {
+            color: var(--success-color);
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(144, 238, 144, 0.3);
+        }
+
+        .streak {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 15px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .streak .fire {
+            font-size: 20px;
+            color: var(--primary-color);
+        }
+
+        .history {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid #e5e5ea;
+        }
+
+        .history-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+        }
+
+        .history-grid {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .history-item {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--bg-secondary);
+            color: var(--text-tertiary);
+            border: 1px solid var(--border-light);
+        }
+
+        .history-item.checked {
+            background: linear-gradient(135deg, var(--success-color), #98fb98);
+            color: #ffffff;
+            border-color: var(--success-color);
+        }
+
+        .history-item.today {
+            border: 2px solid var(--primary-color);
+            background: var(--bg-tertiary);
+        }
+
+        /* Calendar */
+        .calendar {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-light);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .calendar-title {
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            border: 1px solid var(--border-light);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .weekday {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 8px 0;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+        }
+
+        .calendar-day {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--bg-secondary);
+            color: var(--text-tertiary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-light);
+        }
+
+        .calendar-day:hover {
+            background: var(--accent-color);
+            color: white;
+            border-color: var(--accent-color);
+        }
+
+        .calendar-day.checked {
+            background: linear-gradient(135deg, var(--success-color), #98fb98);
+            color: #ffffff;
+            border-color: var(--success-color);
+        }
+
+        .calendar-day.today {
+            border: 2px solid var(--primary-color);
+            background: var(--bg-tertiary);
+        }
+
+        .calendar-day.other-month {
+            opacity: 0.3;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 40px 24px;
+                border-radius: 24px;
+            }
+
+            .date-display .day {
+                font-size: 56px;
+            }
+
+            .checkin-btn {
+                width: 160px;
+                height: 160px;
+            }
+
+            .checkin-btn .icon {
+                font-size: 36px;
+            }
+
+            .checkin-btn .text {
+                font-size: 16px;
+            }
+
+            .calendar-day {
+                width: 36px;
+                height: 36px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="date-display">
+            <div class="day" id="day">--</div>
+            <div class="month-year" id="monthYear">----年--月</div>
+        </div>
+        
+        <div class="week-day" id="weekDay">星期-</div>
+        
+        <button class="checkin-btn" id="checkinBtn">
+            <span class="icon">✓</span>
+            <span class="text">点击打卡</span>
+        </button>
+        
+        <div class="status" id="status">今日未打卡</div>
+        
+        <div class="streak">
+            <span class="fire">🔥</span>
+            <span>连续打卡 <strong id="streakCount">0</strong> 天</span>
+        </div>
+        
+        <div class="history">
+            <div class="history-title">最近7天</div>
+            <div class="history-grid" id="historyGrid"></div>
+        </div>
+        
+        <div class="calendar">
+            <div class="calendar-header">
+                <div class="calendar-title">打卡日历</div>
+                <div class="calendar-nav">
+                    <button class="nav-btn" id="prevMonth">‹</button>
+                    <button class="nav-btn" id="nextMonth">›</button>
+                </div>
+            </div>
+            <div class="calendar-weekdays">
+                <div class="weekday">日</div>
+                <div class="weekday">一</div>
+                <div class="weekday">二</div>
+                <div class="weekday">三</div>
+                <div class="weekday">四</div>
+                <div class="weekday">五</div>
+                <div class="weekday">六</div>
+            </div>
+            <div class="calendar-days" id="calendarDays"></div>
+        </div>
+    </div>
+
+    <script>
+        // 获取DOM元素
+        const dayEl = document.getElementById('day');
+        const monthYearEl = document.getElementById('monthYear');
+        const weekDayEl = document.getElementById('weekDay');
+        const checkinBtn = document.getElementById('checkinBtn');
+        const statusEl = document.getElementById('status');
+        const streakCountEl = document.getElementById('streakCount');
+        const historyGridEl = document.getElementById('historyGrid');
+        const calendarDaysEl = document.getElementById('calendarDays');
+        const prevMonthBtn = document.getElementById('prevMonth');
+        const nextMonthBtn = document.getElementById('nextMonth');
+
+        // 日历当前显示的月份和年份
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        // 星期名称
+        const weekDays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+
+        // 获取今天的日期字符串
+        function getTodayString() {
+            const today = new Date();
+            return today.toISOString().split('T')[0];
+        }
+
+        // 获取日期差（天数）
+        function getDaysDiff(date1, date2) {
+            const d1 = new Date(date1);
+            const d2 = new Date(date2);
+            return Math.floor((d2 - d1) / (1000 * 60 * 60 * 24));
+        }
+
+        // 更新日期显示
+        function updateDateDisplay() {
+            const today = new Date();
+            dayEl.textContent = today.getDate().toString().padStart(2, '0');
+            monthYearEl.textContent = `${today.getFullYear()}年${today.getMonth() + 1}月`;
+            weekDayEl.textContent = weekDays[today.getDay()];
+        }
+
+        // 获取打卡记录
+        function getCheckinRecords() {
+            const records = localStorage.getItem('checkinRecords');
+            return records ? JSON.parse(records) : [];
+        }
+
+        // 保存打卡记录
+        function saveCheckinRecords(records) {
+            localStorage.setItem('checkinRecords', JSON.stringify(records));
+        }
+
+        // 检查今天是否已打卡
+        function isTodayChecked() {
+            const records = getCheckinRecords();
+            const today = getTodayString();
+            return records.includes(today);
+        }
+
+        // 计算连续打卡天数
+        function calculateStreak() {
+            const records = getCheckinRecords();
+            if (records.length === 0) return 0;
+
+            // 按日期排序
+            records.sort();
+
+            let streak = 0;
+            const today = new Date();
+            
+            // 从今天开始往前计算
+            for (let i = 0; i < 365; i++) {
+                const checkDate = new Date(today);
+                checkDate.setDate(checkDate.getDate() - i);
+                const dateStr = checkDate.toISOString().split('T')[0];
+                
+                if (records.includes(dateStr)) {
+                    streak++;
+                } else if (i > 0) {
+                    // 如果不是今天且未打卡，中断连续
+                    break;
+                }
+            }
+
+            return streak;
+        }
+
+        // 更新按钮状态
+        function updateButtonState() {
+            if (isTodayChecked()) {
+                checkinBtn.disabled = true;
+                checkinBtn.innerHTML = `
+                    <span class="icon">✓</span>
+                    <span class="text">已完成</span>
+                `;
+                statusEl.textContent = '今日已完成打卡';
+                statusEl.classList.add('completed');
+            } else {
+                checkinBtn.disabled = false;
+                checkinBtn.innerHTML = `
+                    <span class="icon">✓</span>
+                    <span class="text">点击打卡</span>
+                `;
+                statusEl.textContent = '今日未打卡';
+                statusEl.classList.remove('completed');
+            }
+        }
+
+        // 更新连续打卡天数
+        function updateStreak() {
+            const streak = calculateStreak();
+            streakCountEl.textContent = streak;
+        }
+
+        // 渲染历史记录
+        function renderHistory() {
+            const records = getCheckinRecords();
+            historyGridEl.innerHTML = '';
+
+            const today = new Date();
+            
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                const dateStr = date.toISOString().split('T')[0];
+                const dayNum = date.getDate();
+                const isChecked = records.includes(dateStr);
+                const isToday = i === 0;
+
+                const item = document.createElement('div');
+                item.className = `history-item ${isChecked ? 'checked' : ''} ${isToday ? 'today' : ''}`;
+                item.textContent = dayNum;
+                historyGridEl.appendChild(item);
+            }
+        }
+
+        // 渲染日历
+        function renderCalendar() {
+            const records = getCheckinRecords();
+            calendarDaysEl.innerHTML = '';
+
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+            const endDate = new Date(lastDay);
+            endDate.setDate(endDate.getDate() + (6 - lastDay.getDay()));
+
+            const today = new Date();
+            const isCurrentMonth = today.getMonth() === currentMonth && today.getFullYear() === currentYear;
+
+            let date = new Date(startDate);
+            while (date <= endDate) {
+                const dateStr = date.toISOString().split('T')[0];
+                const dayNum = date.getDate();
+                const isChecked = records.includes(dateStr);
+                const isToday = isCurrentMonth && date.getDate() === today.getDate();
+                const isOtherMonth = date.getMonth() !== currentMonth;
+
+                const dayElement = document.createElement('div');
+                dayElement.className = `calendar-day ${isChecked ? 'checked' : ''} ${isToday ? 'today' : ''} ${isOtherMonth ? 'other-month' : ''}`;
+                dayElement.textContent = dayNum;
+                calendarDaysEl.appendChild(dayElement);
+
+                date.setDate(date.getDate() + 1);
+            }
+        }
+
+        // 切换到上个月
+        function goToPrevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        // 切换到下个月
+        function goToNextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        // 打卡功能
+        function checkin() {
+            if (isTodayChecked()) return;
+
+            const records = getCheckinRecords();
+            const today = getTodayString();
+            records.push(today);
+            saveCheckinRecords(records);
+
+            updateButtonState();
+            updateStreak();
+            renderHistory();
+            renderCalendar();
+
+            // 显示成功提示
+            showToast('打卡成功！');
+        }
+
+        // 显示提示
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 16px 32px;
+                border-radius: 12px;
+                font-size: 16px;
+                z-index: 1000;
+                animation: fadeIn 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'fadeOut 0.3s ease';
+                setTimeout(() => toast.remove(), 300);
+            }, 1500);
+        }
+
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+                to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            }
+            @keyframes fadeOut {
+                from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                to { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 事件监听
+        checkinBtn.addEventListener('click', checkin);
+        prevMonthBtn.addEventListener('click', goToPrevMonth);
+        nextMonthBtn.addEventListener('click', goToNextMonth);
+
+        // 初始化
+        updateDateDisplay();
+        updateButtonState();
+        updateStreak();
+        renderHistory();
+        renderCalendar();
+
+        // 每分钟检查一次日期变化（跨天时更新）
+        setInterval(() => {
+            updateDateDisplay();
+            updateButtonState();
+            renderHistory();
+            renderCalendar();
+        }, 60000);
+    </script>
+</body>
+</html>

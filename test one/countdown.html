@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倒计时</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a0a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .container {
+            text-align: center;
+            padding: 60px 40px;
+            animation: fadeIn 1.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .goal-name {
+            font-size: 24px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% {
+                opacity: 0.7;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .days-display {
+            font-size: 180px;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1;
+            margin-bottom: 10px;
+            letter-spacing: -8px;
+            animation: breathe 4s ease-in-out infinite;
+            text-shadow: 0 0 60px rgba(255, 255, 255, 0.3);
+        }
+
+        .days-label {
+            font-size: 18px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.5);
+            letter-spacing: 4px;
+            margin-bottom: 60px;
+        }
+
+        .time-detail {
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            margin-bottom: 50px;
+        }
+
+        .time-item {
+            text-align: center;
+        }
+
+        .time-value {
+            font-size: 48px;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1;
+            margin-bottom: 8px;
+            animation: breathe 4s ease-in-out infinite;
+        }
+
+        .time-label {
+            font-size: 14px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.4);
+            letter-spacing: 2px;
+        }
+
+        .input-section {
+            margin-top: 40px;
+            animation: fadeIn 1.5s ease-out 0.3s both;
+        }
+
+        .goal-input {
+            width: 300px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .goal-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .goal-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .date-input {
+            width: 300px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .date-input::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            opacity: 0.6;
+            cursor: pointer;
+        }
+
+        .date-input:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .start-btn {
+            padding: 15px 50px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 30px;
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            letter-spacing: 1px;
+        }
+
+        .start-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .start-btn:active {
+            transform: scale(0.98);
+        }
+
+        .reset-btn {
+            padding: 15px 30px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 30px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 14px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+
+        .reset-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .days-display {
+                font-size: 120px;
+                letter-spacing: -5px;
+            }
+
+            .goal-name {
+                font-size: 20px;
+            }
+
+            .time-detail {
+                gap: 30px;
+            }
+
+            .time-value {
+                font-size: 36px;
+            }
+
+            .goal-input, .date-input {
+                width: 250px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .days-display {
+                font-size: 80px;
+                letter-spacing: -3px;
+            }
+
+            .goal-name {
+                font-size: 16px;
+            }
+
+            .time-detail {
+                gap: 20px;
+            }
+
+            .time-value {
+                font-size: 28px;
+            }
+
+            .time-label {
+                font-size: 12px;
+            }
+
+            .goal-input, .date-input {
+                width: 200px;
+                font-size: 14px;
+            }
+
+            .start-btn {
+                padding: 12px 35px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="goal-name" id="goalName">你的目标</div>
+        
+        <div class="days-display" id="daysDisplay">0</div>
+        <div class="days-label">天</div>
+        
+        <div class="time-detail">
+            <div class="time-item">
+                <div class="time-value" id="hours">00</div>
+                <div class="time-label">时</div>
+            </div>
+            <div class="time-item">
+                <div class="time-value" id="minutes">00</div>
+                <div class="time-label">分</div>
+            </div>
+            <div class="time-item">
+                <div class="time-value" id="seconds">00</div>
+                <div class="time-label">秒</div>
+            </div>
+        </div>
+
+        <div class="input-section" id="inputSection">
+            <input type="text" class="goal-input" id="goalInput" placeholder="输入你的目标名称">
+            <input type="datetime-local" class="date-input" id="dateInput">
+            <br>
+            <button class="start-btn" onclick="startCountdown()">开始倒计时</button>
+            <button class="reset-btn" onclick="resetCountdown()">重置</button>
+        </div>
+    </div>
+
+    <script>
+        let countdownInterval;
+        let targetDate;
+
+        function updateDisplay(time) {
+            const days = Math.floor(time / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((time % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((time % (1000 * 60)) / 1000);
+
+            document.getElementById('daysDisplay').textContent = days;
+            document.getElementById('hours').textContent = String(hours).padStart(2, '0');
+            document.getElementById('minutes').textContent = String(minutes).padStart(2, '0');
+            document.getElementById('seconds').textContent = String(seconds).padStart(2, '0');
+        }
+
+        function startCountdown() {
+            const goalInput = document.getElementById('goalInput').value;
+            const dateInput = document.getElementById('dateInput').value;
+
+            if (!dateInput) {
+                alert('请选择目标时间');
+                return;
+            }
+
+            const goalName = goalInput || '你的目标';
+            document.getElementById('goalName').textContent = goalName;
+
+            targetDate = new Date(dateInput).getTime();
+            const now = Date.now();
+
+            if (targetDate <= now) {
+                alert('目标时间必须是未来时间');
+                return;
+            }
+
+            clearInterval(countdownInterval);
+
+            countdownInterval = setInterval(() => {
+                const remainingTime = targetDate - Date.now();
+
+                if (remainingTime <= 0) {
+                    clearInterval(countdownInterval);
+                    updateDisplay(0);
+                    return;
+                }
+
+                updateDisplay(remainingTime);
+            }, 1000);
+
+            updateDisplay(targetDate - now);
+        }
+
+        function resetCountdown() {
+            clearInterval(countdownInterval);
+            document.getElementById('daysDisplay').textContent = '0';
+            document.getElementById('hours').textContent = '00';
+            document.getElementById('minutes').textContent = '00';
+            document.getElementById('seconds').textContent = '00';
+            document.getElementById('goalName').textContent = '你的目标';
+            document.getElementById('goalInput').value = '';
+            document.getElementById('dateInput').value = '';
+        }
+    </script>
+</body>
+</html>
